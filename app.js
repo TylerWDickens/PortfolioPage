@@ -1,11 +1,12 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const nodemailer = require('nodemailer');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
 
 const functions = require('firebase-functions')
 // Import the functions you need from the SDKs you need
@@ -46,6 +47,44 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+router.post('/send-email', (req, res) => {
+    // Extract the form data from the request body
+    const { name, email, phone, message } = req.body;
+
+    // Set up the nodemailer transport to use Gmail
+    const transport = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'YOUR_EMAIL_ADDRESS',
+            pass: 'YOUR_EMAIL_PASSWORD'
+        }
+    });
+
+    // Define the email options
+    const mailOptions = {
+        from: 'FROM_EMAIL_ADDRESS',
+        to: 'TO_EMAIL_ADDRESS',
+        subject: 'New form submission',
+        html: `
+      <p>Name: ${name}</p>
+      <p>Email: ${email}</p>
+      <p>Phone: ${phone}</p>
+      <p>Message: ${message}</p>
+    `
+    };
+
+    // Send the email
+    transport.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error(error);
+            res.sendStatus(500);
+        } else {
+            console.log(`Email sent: ${info.response}`);
+            res.sendStatus(200);
+        }
+    });
+});
 
 // // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
