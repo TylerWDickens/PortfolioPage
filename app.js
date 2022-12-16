@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const nodemailer = require('nodemailer');
+const dotenv = require('dotenv')
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -33,8 +34,6 @@ const analytics = getAnalytics(fireApp);
 
 var app = express();
 
-
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -56,15 +55,15 @@ router.post('/send-email', (req, res) => {
     const transport = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'YOUR_EMAIL_ADDRESS',
-            pass: 'YOUR_EMAIL_PASSWORD'
+            user: process.env.EMAIL_ADDRESS,
+            pass: process.env.EMAIL_PASSWORD
         }
     });
 
     // Define the email options
     const mailOptions = {
-        from: 'FROM_EMAIL_ADDRESS',
-        to: 'TO_EMAIL_ADDRESS',
+        from: process.env.EMAIL_ADDRESS,
+        to: 'tyler.william.dickens@gmail.com',
         subject: 'New form submission',
         html: `
       <p>Name: ${name}</p>
